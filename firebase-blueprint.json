@@ -1,0 +1,105 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Authenticated user profile",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "email"]
+    },
+    "Device": {
+      "title": "Device",
+      "description": "Registered device with hardware info, pairing status, and live telemetry",
+      "type": "object",
+      "properties": {
+        "deviceId": { "type": "string" },
+        "userId": { "type": "string" },
+        "deviceName": { "type": "string" },
+        "model": { "type": "string" },
+        "role": { "type": "string", "enum": ["MONITOR", "DEVICE"] },
+        "pairedWithDeviceId": { "type": "string" },
+        "isOnline": { "type": "boolean" },
+        "lastSeen": { "type": "string", "format": "date-time" },
+        "permissions": { "type": "object" },
+        "currentLocation": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["deviceId", "userId", "deviceName", "role"]
+    },
+    "PairingCode": {
+      "title": "PairingCode",
+      "description": "Temporary 6-character cryptographic code for pairing CP A and CP B",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "monitorDeviceId": { "type": "string" },
+        "monitorUserId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["PENDING", "CLAIMED", "EXPIRED"] },
+        "targetDeviceId": { "type": "string" }
+      },
+      "required": ["code", "monitorDeviceId", "monitorUserId", "status"]
+    },
+    "Session": {
+      "title": "Session",
+      "description": "Authorized camera/microphone streaming session request and signaling state",
+      "type": "object",
+      "properties": {
+        "sessionId": { "type": "string" },
+        "monitorDeviceId": { "type": "string" },
+        "targetDeviceId": { "type": "string" },
+        "monitorUserId": { "type": "string" },
+        "type": { "type": "string", "enum": ["CAMERA_REAR", "CAMERA_FRONT", "AUDIO_ONLY"] },
+        "status": { "type": "string", "enum": ["REQUESTED", "APPROVED", "REJECTED", "ACTIVE", "ENDED"] },
+        "offerSdp": { "type": "string" },
+        "answerSdp": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["sessionId", "monitorDeviceId", "targetDeviceId", "type", "status"]
+    },
+    "IceCandidate": {
+      "title": "IceCandidate",
+      "description": "WebRTC ICE Candidate exchanged during streaming setup",
+      "type": "object",
+      "properties": {
+        "candidateId": { "type": "string" },
+        "senderRole": { "type": "string", "enum": ["MONITOR", "TARGET"] },
+        "sdpMid": { "type": "string" },
+        "sdpMLineIndex": { "type": "integer" },
+        "sdp": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["candidateId", "senderRole", "sdp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles"
+    },
+    "/devices/{deviceId}": {
+      "schema": { "$ref": "#/entities/Device" },
+      "description": "Registered devices"
+    },
+    "/pairing_codes/{code}": {
+      "schema": { "$ref": "#/entities/PairingCode" },
+      "description": "Active temporary pairing codes"
+    },
+    "/sessions/{sessionId}": {
+      "schema": { "$ref": "#/entities/Session" },
+      "description": "Authorized streaming sessions"
+    },
+    "/sessions/{sessionId}/ice_candidates/{candidateId}": {
+      "schema": { "$ref": "#/entities/IceCandidate" },
+      "description": "ICE candidates for peer-to-peer WebRTC signaling"
+    }
+  }
+}
